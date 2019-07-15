@@ -5,29 +5,37 @@ from graphene import Schema
 import graphene
 
 
+class InputPerson(graphene.InputObjectType):
+    first_name = graphene.String()
+    last_name = graphene.String()
+
+
 class Person(ObjectType):
     first_name = String()
     last_name = String()
     full_name = String()
 
-    # def resolve_first_name(parent, info):
-    #     return "Иван"
-    #
-    # def resolve_full_name(parent, info):
-    #     return 'Иванов Иван'
-
 
 class Queries(graphene.ObjectType):
 
-    person = graphene.Field(Person, first_name=graphene.String(), last_name=graphene.String())
+    person = graphene.Field(Person, input=InputPerson())
+    # person = graphene.Field(Person, first_name=graphene.String(), last_name=graphene.NonNull(graphene.String))
 
-    def resolve_person(self, *args, **kwargs):
+    def resolve_person(self, *args, input: InputPerson, **kwargs):
         result = Person()
-        result.first_name = kwargs['first_name']
-        result.last_name = kwargs['last_name']
-        result.full_name = f"{kwargs['last_name']} {kwargs['first_name']}"
+        result.first_name = input.first_name
+        result.last_name = input.last_name
+        result.full_name = f"{input.first_name} {input.last_name}"
 
         return result
+
+    # def resolve_person(self, *args, first_name='', last_name='', **kwargs):
+    #     result = Person()
+    #     result.first_name = first_name
+    #     result.last_name = last_name
+    #     result.full_name = f"{first_name} {last_name}"
+    #
+    #     return result
 
 
 Schema = Schema(query=Queries)
